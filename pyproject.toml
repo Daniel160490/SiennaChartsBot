@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "siennachartsbot"
 version = "0.1.0"
-description = "Bot de Telegram"
-authors = ["Tu Nombre <tu_email@example.com>"]
+description = "Bot para grupo de Telegram: SiennaCharts"
+authors = ["Dani G.D. <danigd71@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.11"
 python-telegram-bot = "^21.10"
 
 [build-system]
