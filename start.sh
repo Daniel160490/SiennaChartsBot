@@ -1,3 +1,3 @@
 #!/bin/bash
 echo "Iniciando bot de SiennaCharts..."
-python bot.py
+pip install -r requirements.txt && python3 bot.py
