@@ -1,8 +1,9 @@
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
+import os
 
 
-TOKEN = "8166866319:AAH1OubVUZDaj12OQX6gv6nKJ6CtcawEYEg"
+TOKEN = os.getenv("BOT_TOKEN")
 
 async def start(update: Update, context):
     await update.message.reply_text("¡Hola! Soy el bot de SiennaCharts.")
