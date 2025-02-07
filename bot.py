@@ -107,8 +107,6 @@ async def main():
 
 # Manejo del loop con nest_asyncio
 if __name__ == "__main__":
-    try:
-        nest_asyncio.apply()  # 🔥 Soluciona "event loop is already running"
-        asyncio.run(main())
-    except RuntimeError as e:
-        print(f"Error con el bucle de eventos: {e}")
+    nest_asyncio.apply()  # 🔹 Permite reutilizar el bucle de eventos sin conflictos
+
+    asyncio.run(main())  # 🔹 Maneja el bucle de eventos de manera correcta
