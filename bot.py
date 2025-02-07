@@ -29,6 +29,7 @@ async def obtener_posts_instagram():
     try:
         nuevos_links = []
         response_media = requests.get(url).json()
+        print("Respuesta de Instagram:", response_media)
         for post in response_media.get("data", []):
             post_id = post.get("id")
             permalink = post.get("permalink")
