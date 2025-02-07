@@ -100,10 +100,9 @@ async def main():
     # Ejecutar `enviar_posts_telegram` en paralelo sin interferir con `run_polling`
     asyncio.create_task(enviar_posts_telegram())
 
-    # Iniciar el bot en modo polling
+    # Iniciar el bot en modo polling (sin usar loop.run_until_complete)
     await app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
 if __name__ == "__main__":
-    # Usar el bucle de eventos existente (sin asyncio.run())
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    # Simplemente ejecutar el main() sin intentar crear un nuevo bucle de eventos
+    asyncio.run(main())  # Esto maneja el bucle de eventos internamente
