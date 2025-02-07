@@ -89,6 +89,9 @@ async def enviar_posts_telegram(app):
 
         await asyncio.sleep(1800)  # Revisa nuevas publicaciones cada 30 minutos
 
+async def iniciar_verificacion():
+    await enviar_posts_telegram(None) 
+    
 # Función principal del bot
 def main():
     app = Application.builder().token(TOKEN_TELEGRAM).build()
@@ -98,9 +101,8 @@ def main():
 
     print("SiennaCharts funcionando ...")
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.create_task(enviar_posts_telegram(app))
+    loop = asyncio.get_event_loop()
+    loop.create_task(iniciar_verificacion())  # Inicia la verificación en segundo plano
 
     app.run_polling()
 
