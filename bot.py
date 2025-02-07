@@ -71,6 +71,6 @@ async def main():
     await app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
 if __name__ == "__main__":
-    # Eliminar `asyncio.run(main())` porque `Application.run_polling()` ya maneja el bucle de eventos
+    # Ejecutar todo directamente sin usar `asyncio.run()` ni `get_event_loop()`
     print("Iniciando el bot...")
-    asyncio.get_event_loop().run_until_complete(main())  # Usamos el bucle actual en lugar de `asyncio.run()`
+    asyncio.run(main())  # Usamos `asyncio.run()` aquí, que es la forma recomendada con Python 3.7+
