@@ -104,4 +104,6 @@ async def main():
     await app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Usar el bucle de eventos existente (sin asyncio.run())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
