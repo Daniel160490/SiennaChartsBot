@@ -9,6 +9,7 @@ TOKEN_TELEGRAM = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 INSTAGRAM_USER_ID = os.getenv("INSTAGRAM_USER_ID")  # Asegúrate de que este es el ID de Instagram Business
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
+ID_DEL_TEMA = os.getenv("ID_DEL_TEMA")
 
 ultimos_posts = set()  # Almacena los últimos posts para evitar duplicados
 
@@ -72,8 +73,10 @@ async def enviar_posts_telegram():
         for mensaje, media_url in nuevos_posts:
             print(f"📤 Enviando post a Telegram: {mensaje}")
 
+            chat_id_tema_seleccionado = 'ID_DEL_TEMA'
+
             url_imagen = f"https://api.telegram.org/bot{TOKEN_TELEGRAM}/sendPhoto"
-            response = requests.post(url_imagen, data={"chat_id": CHAT_ID, "photo": media_url, "caption": mensaje})
+            response = requests.post(url_imagen, data={"chat_id": chat_id_tema_seleccionado, "photo": media_url, "caption": mensaje})
             
             print(f"📨 Respuesta de Telegram: {response.status_code} - {response.text}")
 
