@@ -73,7 +73,7 @@ async def enviar_posts_telegram():
         for mensaje, media_url in nuevos_posts:
             print(f"📤 Enviando post a Telegram: {mensaje}")
 
-            chat_id_tema_seleccionado = 'ID_DEL_TEMA'
+            chat_id_tema_seleccionado = ID_DEL_TEMA
             print(f"ID del tema de telegram: {chat_id_tema_seleccionado}")
             
             url_imagen = f"https://api.telegram.org/bot{TOKEN_TELEGRAM}/sendPhoto"
