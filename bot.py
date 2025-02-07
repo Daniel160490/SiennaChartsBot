@@ -28,24 +28,47 @@ async def bienvenida(update: Update, context):
 async def obtener_posts_instagram():
     global ultimos_posts
     url = f"https://graph.facebook.com/v19.0/{INSTAGRAM_USER_ID}/media?fields=id,caption,permalink&access_token={ACCESS_TOKEN}"
+    url_stories = f"https://graph.facebook.com/v19.0/{INSTAGRAM_USER_ID}/stories?fields=id,media_type,media_url,permalink&access_token={ACCESS_TOKEN}"
+
     
     try:
-        response = requests.get(url).json()
         nuevos_links = []
         
-        for post in response.get("data", []):
+        # Obtener publicaciones normales
+        response_media = requests.get(url_media).json()
+        for post in response_media.get("data", []):
             post_id = post.get("id")
             link = post.get("permalink")
+            media_url = post.get("media_url")
+            media_type = post.get("media_type")  # IMAGE, VIDEO, CAROUSEL_ALBUM
             
-            if post_id and link and post_id not in ultimos_posts:
+            if post_id and post_id not in ultimos_posts:
                 ultimos_posts.add(post_id)
-                nuevos_links.append(link)
+                mensaje = f"📸 Nueva publicación en Instagram:\n{link}"
+                if media_type == "IMAGE":
+                    mensaje = f"🖼 Nueva foto en Instagram:\n{link}"
+                elif media_type == "VIDEO":
+                    mensaje = f"🎥 Nuevo video en Instagram:\n{link}"
+                
+                nuevos_links.append((mensaje, media_url))
+
+        # Obtener historias
+        response_stories = requests.get(url_stories).json()
+        for story in response_stories.get("data", []):
+            story_id = story.get("id")
+            media_url = story.get("media_url")
+            
+            if story_id and story_id not in ultimos_posts:
+                ultimos_posts.add(story_id)
+                mensaje = "📖 ¡Nueva historia en Instagram!"
+                nuevos_links.append((mensaje, media_url))
 
         return nuevos_links
     
     except Exception as e:
-        print(f"Error obteniendo publicaciones de Instagram: {e}")
+        print(f"Error obteniendo publicaciones o historias de Instagram: {e}")
         return []
+
 
 # Función para enviar los enlaces al grupo de Telegram
 async def enviar_posts_telegram(app):
