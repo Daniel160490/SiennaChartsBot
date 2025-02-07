@@ -57,18 +57,21 @@ async def enviar_posts_telegram():
             requests.post(url_imagen, data={"chat_id": CHAT_ID, "photo": media_url, "caption": mensaje})
         await asyncio.sleep(300)  # 🔹 Cambiado a 5 minutos (300 segundos)
 
-async def main():
+async def iniciar_verificacion(app):
+    await enviar_posts_telegram(app)
+
+def main():
     app = Application.builder().token(TOKEN_TELEGRAM).build()
+    
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, bienvenida))
 
     print("SiennaCharts funcionando ...")
 
-    # Inicia el envío de publicaciones en segundo plano
-    asyncio.create_task(enviar_posts_telegram())
+    # Inicia la verificación dentro del loop de la aplicación
+    app.job_queue.run_repeating(lambda _: asyncio.create_task(enviar_posts_telegram(app)), interval=1800)
 
-    # Inicia el polling para recibir mensajes
-    await app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
+    app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
 if __name__ == "__main__":
     # Ejecutar todo directamente sin usar `asyncio.run()` ni `get_event_loop()`
