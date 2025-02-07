@@ -74,7 +74,8 @@ async def enviar_posts_telegram():
             print(f"📤 Enviando post a Telegram: {mensaje}")
 
             chat_id_tema_seleccionado = 'ID_DEL_TEMA'
-
+            print(f"ID del tema de telegram: {chat_id_tema_seleccionado}")
+            
             url_imagen = f"https://api.telegram.org/bot{TOKEN_TELEGRAM}/sendPhoto"
             response = requests.post(url_imagen, data={"chat_id": chat_id_tema_seleccionado, "photo": media_url, "caption": mensaje})
             
