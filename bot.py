@@ -55,7 +55,7 @@ async def enviar_posts_telegram():
         for mensaje, media_url in nuevos_posts:
             url_imagen = f"https://api.telegram.org/bot{TOKEN_TELEGRAM}/sendPhoto"
             requests.post(url_imagen, data={"chat_id": CHAT_ID, "photo": media_url, "caption": mensaje})
-        await asyncio.sleep(300)  # 🔹 Cambiado a 5 minutos (300 segundos)
+        await asyncio.sleep(60)  # 🔹 Cambiado a 5 minutos (300 segundos)
 
 async def iniciar_verificacion(app):
     await enviar_posts_telegram(app)
