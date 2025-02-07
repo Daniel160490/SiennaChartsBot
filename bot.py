@@ -97,11 +97,16 @@ def main():
 
     print("✅ Bot iniciado correctamente.")
 
-    # Eliminar posibles instancias previas y evitar conflictos
-    asyncio.create_task(detener_instancia_anterior())
-    asyncio.create_task(enviar_posts_telegram())
+    # Iniciar la verificación de publicaciones en un loop asíncrono
+    asyncio.run(iniciar_procesos())
 
+def iniciar_bot():
     app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
+
+async def iniciar_procesos():
+    await detener_instancia_anterior()  # Asegura que no haya otra instancia corriendo
+    asyncio.create_task(enviar_posts_telegram())  # Comienza a verificar publicaciones de IG en segundo plano
+    iniciar_bot()  # Inicia el bot en modo polling
 
 if __name__ == "__main__":
     main()
