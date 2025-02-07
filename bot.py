@@ -86,7 +86,7 @@ async def enviar_posts_telegram():
             else:
                 requests.post(url_texto, data={"chat_id": CHAT_ID, "text": mensaje})
 
-        await asyncio.sleep(1800)  # Revisa nuevas publicaciones cada 30 minutos
+        await asyncio.sleep(300)  # Revisar nuevas publicaciones cada 5 minutos
 
 # Función principal del bot
 async def main():
@@ -100,9 +100,16 @@ async def main():
     # Ejecutar `enviar_posts_telegram` en paralelo sin interferir con `run_polling`
     asyncio.create_task(enviar_posts_telegram())
 
-    # Iniciar el bot en modo polling (sin usar loop.run_until_complete)
+    # Iniciar el bot en modo polling (sin cerrar el loop)
     await app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
 if __name__ == "__main__":
-    # Simplemente ejecutar el main() sin intentar crear un nuevo bucle de eventos
-    asyncio.run(main())  # Esto maneja el bucle de eventos internamente
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            print("El bucle de eventos ya está en ejecución. Ejecutando main() en una nueva tarea.")
+            loop.create_task(main())
+        else:
+            loop.run_until_complete(main())
+    except RuntimeError as e:
+        print(f"Error con el bucle de eventos: {e}")
