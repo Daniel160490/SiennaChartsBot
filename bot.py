@@ -7,7 +7,7 @@ import asyncio
 # Variables de entorno
 TOKEN_TELEGRAM = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
-INSTAGRAM_USER_ID = os.getenv("INSTAGRAM_USER_ID")
+INSTAGRAM_USER_ID = os.getenv("INSTAGRAM_USER_ID")  # Asegúrate de que este es el ID de Instagram Business
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 
 ultimos_posts = set()  # Almacena los últimos posts para evitar duplicados
@@ -28,19 +28,21 @@ async def obtener_posts_instagram():
     global ultimos_posts
     print("Obteniendo publicaciones de Instagram...")
 
-    url = f"https://graph.facebook.com/v19.0/{INSTAGRAM_USER_ID}/media?fields=id,caption,permalink,media_type&access_token={ACCESS_TOKEN}"
+    url = f"https://graph.facebook.com/v19.0/{INSTAGRAM_USER_ID}/media?fields=id,caption,media_type,permalink&access_token={ACCESS_TOKEN}"
 
     try:
         response_media = requests.get(url)
         print(f"Respuesta de Instagram (código {response_media.status_code}): {response_media.text}")
 
+        if response_media.status_code != 200:
+            return []
+
         data = response_media.json()
         nuevos_links = []
-        
+
         for post in data.get("data", []):
             post_id = post.get("id")
             permalink = post.get("permalink")
-            media_type = post.get("media_type")
 
             if post_id and post_id not in ultimos_posts:
                 ultimos_posts.add(post_id)
@@ -50,7 +52,7 @@ async def obtener_posts_instagram():
                 ).json()
 
                 media_url = media_response.get("media_url", "")
-                
+
                 mensaje = f"📸 Nueva publicación en Instagram:\n{permalink}"
                 nuevos_links.append((mensaje, media_url))
 
@@ -78,9 +80,16 @@ async def enviar_posts_telegram():
         print("🔁 Esperando 60 segundos antes de la próxima verificación...")
         await asyncio.sleep(60)
 
+async def detener_instancia_anterior():
+    try:
+        await app.stop()
+    except:
+        pass
+
 def main():
     print("🚀 Iniciando bot SiennaCharts...")
 
+    global app
     app = Application.builder().token(TOKEN_TELEGRAM).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -88,9 +97,9 @@ def main():
 
     print("✅ Bot iniciado correctamente.")
 
-    # Iniciar la verificación en segundo plano
-    loop = asyncio.get_event_loop()
-    loop.create_task(enviar_posts_telegram())
+    # Eliminar posibles instancias previas y evitar conflictos
+    asyncio.create_task(detener_instancia_anterior())
+    asyncio.create_task(enviar_posts_telegram())
 
     app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
