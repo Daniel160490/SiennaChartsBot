@@ -100,16 +100,20 @@ async def main():
     # Ejecutar `enviar_posts_telegram` en paralelo sin interferir con `run_polling`
     asyncio.create_task(enviar_posts_telegram())
 
-    # Iniciar el bot en modo polling (sin cerrar el loop)
+    # Iniciar el bot en modo polling
     await app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
 if __name__ == "__main__":
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            print("El bucle de eventos ya está en ejecución. Ejecutando main() en una nueva tarea.")
-            loop.create_task(main())
-        else:
-            loop.run_until_complete(main())
+        try:
+            loop = asyncio.get_running_loop()
+            print("El bucle de eventos ya está en ejecución.")
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            print("Creando un nuevo bucle de eventos.")
+
+        loop.run_until_complete(main())
+
     except RuntimeError as e:
         print(f"Error con el bucle de eventos: {e}")
