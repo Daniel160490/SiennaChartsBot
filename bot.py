@@ -64,13 +64,13 @@ async def main():
 
     print("SiennaCharts funcionando ...")
 
-    # 🔹 Se usa `asyncio.create_task()` en lugar de bloquear el bucle de eventos
+    # Inicia el envío de publicaciones en segundo plano
     asyncio.create_task(enviar_posts_telegram())
 
+    # Inicia el polling para recibir mensajes
     await app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
 if __name__ == "__main__":
-    # 🔹 Solución: No usar `asyncio.run()`, sino `get_event_loop().run_until_complete()`
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(main())
+    # No es necesario manejar el bucle de eventos aquí
+    print("Iniciando el bot...")
+    asyncio.run(main())  # Esta línea es suficiente para ejecutar todo correctamente
