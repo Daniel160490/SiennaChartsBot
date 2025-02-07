@@ -101,10 +101,14 @@ def main():
 
     print("SiennaCharts funcionando ...")
 
-    loop = asyncio.get_event_loop()
-    loop.create_task(iniciar_verificacion())  # Inicia la verificación en segundo plano
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
-    app.run_polling()
+    loop.run_in_executor(None, asyncio.run, iniciar_verificacion())
+
+
+    app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
+
 
 if __name__ == "__main__":
     main()
