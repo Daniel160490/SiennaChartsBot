@@ -29,7 +29,6 @@ async def obtener_posts_instagram():
     try:
         nuevos_links = []
         response_media = requests.get(url).json()
-        print("Respuesta de Instagram:", response_media)
         for post in response_media.get("data", []):
             post_id = post.get("id")
             permalink = post.get("permalink")
@@ -69,7 +68,9 @@ def main():
 
     print("SiennaCharts funcionando ...")
 
-    # Ejecuta el bot para recibir actualizaciones de Telegram
+    # Inicia la verificación dentro del loop de la aplicación
+    app.job_queue.run_repeating(lambda _: asyncio.create_task(enviar_posts_telegram(app)), interval=1800)
+
     app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
 if __name__ == "__main__":
