@@ -27,28 +27,31 @@ async def bienvenida(update: Update, context):
 # Función para obtener publicaciones de Instagram
 async def obtener_posts_instagram():
     global ultimos_posts
-    url = f"https://graph.facebook.com/v19.0/{INSTAGRAM_USER_ID}/media?fields=id,caption,permalink&access_token={ACCESS_TOKEN}"
+    url = f"https://graph.facebook.com/v19.0/{INSTAGRAM_USER_ID}/media?fields=id,caption,permalink,media_type&access_token={ACCESS_TOKEN}"
     url_stories = f"https://graph.facebook.com/v19.0/{INSTAGRAM_USER_ID}/stories?fields=id,media_type,media_url,permalink&access_token={ACCESS_TOKEN}"
 
-    
     try:
         nuevos_links = []
         
         # Obtener publicaciones normales
-        response_media = requests.get(url_media).json()
+        response_media = requests.get(url).json()
         for post in response_media.get("data", []):
             post_id = post.get("id")
-            link = post.get("permalink")
-            media_url = post.get("media_url")
+            permalink = post.get("permalink")
             media_type = post.get("media_type")  # IMAGE, VIDEO, CAROUSEL_ALBUM
             
             if post_id and post_id not in ultimos_posts:
                 ultimos_posts.add(post_id)
-                mensaje = f"📸 Nueva publicación en Instagram:\n{link}"
+                
+                # Obtener la URL real del contenido
+                media_response = requests.get(f"https://graph.facebook.com/v19.0/{post_id}?fields=media_url&access_token={ACCESS_TOKEN}").json()
+                media_url = media_response.get("media_url", "")
+                
+                mensaje = f"📸 Nueva publicación en Instagram:\n{permalink}"
                 if media_type == "IMAGE":
-                    mensaje = f"🖼 Nueva foto en Instagram:\n{link}"
+                    mensaje = f"🖼 Nueva foto en Instagram:\n{permalink}"
                 elif media_type == "VIDEO":
-                    mensaje = f"🎥 Nuevo video en Instagram:\n{link}"
+                    mensaje = f"🎥 Nuevo video en Instagram:\n{permalink}"
                 
                 nuevos_links.append((mensaje, media_url))
 
@@ -75,10 +78,14 @@ async def enviar_posts_telegram(app):
     while True:
         nuevos_posts = await obtener_posts_instagram()
         
-        for link in nuevos_posts:
-            mensaje = f"📸 Nueva publicación en Instagram: {link}"
-            url_telegram = f"https://api.telegram.org/bot{TOKEN_TELEGRAM}/sendMessage"
-            requests.post(url_telegram, data={"chat_id": CHAT_ID, "text": mensaje})
+        for mensaje, media_url in nuevos_posts:
+            url_texto = f"https://api.telegram.org/bot{TOKEN_TELEGRAM}/sendMessage"
+            url_imagen = f"https://api.telegram.org/bot{TOKEN_TELEGRAM}/sendPhoto"
+
+            if media_url:
+                requests.post(url_imagen, data={"chat_id": CHAT_ID, "photo": media_url, "caption": mensaje})
+            else:
+                requests.post(url_texto, data={"chat_id": CHAT_ID, "text": mensaje})
 
         await asyncio.sleep(1800)  # Revisa nuevas publicaciones cada 30 minutos
 
@@ -91,8 +98,8 @@ def main():
 
     print("SiennaCharts funcionando ...")
 
-    # Ejecuta la tarea de monitoreo de Instagram en segundo plano
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     loop.create_task(enviar_posts_telegram(app))
 
     app.run_polling()
