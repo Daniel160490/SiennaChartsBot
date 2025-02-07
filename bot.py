@@ -5,10 +5,10 @@ import os
 import asyncio
 
 # Variables de entorno
-TOKEN_TELEGRAM = os.getenv("BOT_TOKEN")  # Token del bot de Telegram
-CHAT_ID = os.getenv("CHAT_ID")  # ID del grupo de Telegram
-INSTAGRAM_USER_ID = os.getenv("INSTAGRAM_USER_ID")  # ID del usuario de Instagram
-ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")  # Token de acceso a la API de Instagram
+TOKEN_TELEGRAM = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
+INSTAGRAM_USER_ID = os.getenv("INSTAGRAM_USER_ID")
+ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 
 # Diccionario para almacenar las últimas publicaciones enviadas
 ultimos_posts = set()
@@ -38,7 +38,7 @@ async def obtener_posts_instagram():
         for post in response_media.get("data", []):
             post_id = post.get("id")
             permalink = post.get("permalink")
-            media_type = post.get("media_type")  # IMAGE, VIDEO, CAROUSEL_ALBUM
+            media_type = post.get("media_type")
             
             if post_id and post_id not in ultimos_posts:
                 ultimos_posts.add(post_id)
@@ -72,9 +72,8 @@ async def obtener_posts_instagram():
         print(f"Error obteniendo publicaciones o historias de Instagram: {e}")
         return []
 
-
 # Función para enviar los enlaces al grupo de Telegram
-async def enviar_posts_telegram(app):
+async def enviar_posts_telegram():
     while True:
         nuevos_posts = await obtener_posts_instagram()
         
@@ -89,11 +88,8 @@ async def enviar_posts_telegram(app):
 
         await asyncio.sleep(1800)  # Revisa nuevas publicaciones cada 30 minutos
 
-async def iniciar_verificacion():
-    await enviar_posts_telegram(None) 
-    
 # Función principal del bot
-def main():
+async def main():
     app = Application.builder().token(TOKEN_TELEGRAM).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -101,14 +97,11 @@ def main():
 
     print("SiennaCharts funcionando ...")
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+    # Ejecutar `enviar_posts_telegram` en paralelo sin interferir con `run_polling`
+    asyncio.create_task(enviar_posts_telegram())
 
-    loop.run_in_executor(None, asyncio.run, iniciar_verificacion())
-
-
-    app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
-
+    # Iniciar el bot en modo polling
+    await app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
