@@ -1,6 +1,7 @@
 import asyncio
 import os
 import requests
+import nest_asyncio  # <-- 🔥 Permite usar asyncio sin errores en entornos restringidos
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
@@ -104,11 +105,10 @@ async def main():
         await app.stop()
         await app.shutdown()
 
-# Manejo correcto del loop en Python 3.12
+# Manejo del loop con nest_asyncio
 if __name__ == "__main__":
     try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(main())
+        nest_asyncio.apply()  # 🔥 Soluciona "event loop is already running"
+        asyncio.run(main())
     except RuntimeError as e:
         print(f"Error con el bucle de eventos: {e}")
